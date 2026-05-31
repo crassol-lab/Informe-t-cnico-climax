@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Informe de Servicio Rápido</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #003b8e; --blue-light: #e8eef8; --accent: #0057d9;
+    --green: #00875a; --green-light: #e3fcef;
+    --gray-bg: #f0f2f7; --card-bg: #ffffff; --text: #1a1a2e;
+    --muted: #6b7280; --border: #dde2ec; --shadow: 0 2px 12px rgba(0,59,142,.10);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--gray-bg); color: var(--text); min-height: 100vh; padding-bottom: 40px; }
+
+  header { background: var(--blue); color: white; padding: 22px 20px 18px; text-align: center; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 12px rgba(0,59,142,.25); }
+  header h1 { font-size: 20px; font-weight: 700; }
+  header .fecha-hora { font-family: 'DM Mono', monospace; font-size: 12px; opacity: .75; margin-top: 4px; }
+
+  .container { max-width: 500px; margin: 0 auto; padding: 18px 16px; display: flex; flex-direction: column; gap: 14px; }
+
+  .card { background: var(--card-bg); border-radius: 16px; padding: 20px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+
+  .card-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--blue); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .card-title .num { background: var(--blue); color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; }
+
+  .field-label { font-size: 12px; font-weight: 600; color: var(--muted); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .5px; }
+
+  input, textarea, select {
+    width: 100%; padding: 12px 14px; border: 1.5px solid var(--border);
+    border-radius: 10px; font-size: 15px; font-family: 'DM Sans', sans-serif;
+    color: var(--text); background: #fafbff;
+    transition: border-color .2s, box-shadow .2s;
+    margin-bottom: 10px; appearance: none; -webkit-appearance: none;
+  }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,87,217,.12); background: #fff; }
+
+  .select-wrapper { position: relative; margin-bottom: 10px; }
+  .select-wrapper select { margin-bottom: 0; }
+  .select-wrapper::after { content: '▾'; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--muted); font-size: 14px; }
+
+  .subtipo-wrapper { display: none; margin-top: -6px; margin-bottom: 10px; }
+  .subtipo-wrapper.visible { display: block; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .two-col > div label { font-size: 12px; font-weight: 600; color: var(--muted); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .5px; }
+  .two-col > div input, .two-col > div select { margin-bottom: 0; }
+  .two-col .select-wrapper { margin-bottom: 0; }
+
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .three-col > div label { font-size: 12px; font-weight: 600; color: var(--muted); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .5px; }
+  .three-col > div input { margin-bottom: 0; }
+
+  .problems-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .problem-btn { padding: 14px 10px; border: 1.5px solid var(--border); border-radius: 12px; text-align: center; background: #fafbff; cursor: pointer; font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--text); transition: all .18s; user-select: none; -webkit-tap-highlight-color: transparent; font-weight: 500; line-height: 1.3; }
+  .problem-btn:active { transform: scale(.96); }
+  .problem-btn.selected { background: var(--blue-light); border-color: var(--accent); color: var(--accent); font-weight: 700; }
+  .problem-btn .emoji { display: block; font-size: 22px; margin-bottom: 4px; }
+
+  textarea { resize: vertical; min-height: 90px; }
+
+  .presupuesto-detalle { display: none; }
+  .presupuesto-detalle.visible { display: block; }
+  .presupuesto-detalle textarea { border-color: #f59e0b; background: #fffbeb; min-height: 80px; }
+  .presupuesto-detalle textarea:focus { border-color: #d97706; box-shadow: 0 0 0 3px rgba(217,119,6,.12); }
+  .presupuesto-label { font-size: 12px; font-weight: 700; color: #b45309; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; display: block; }
+
+  .file-label { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1.5px dashed var(--border); border-radius: 10px; cursor: pointer; font-size: 14px; color: var(--muted); background: #fafbff; transition: border-color .2s; margin-top: 2px; }
+  .file-label:hover { border-color: var(--accent); color: var(--accent); }
+  .file-label input[type=file] { display: none; }
+  #foto-nombre { font-size: 13px; color: var(--green); font-weight: 500; }
+  .foto-aviso { font-size: 12px; color: #b45309; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 8px 12px; margin-top: 8px; display: none; }
+  .foto-aviso.visible { display: block; }
+
+  .btns { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+  .btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 15px; border: none; border-radius: 12px; font-size: 15px; font-family: 'DM Sans', sans-serif; font-weight: 700; cursor: pointer; transition: opacity .2s, transform .15s; }
+  .btn:active { transform: scale(.97); opacity: .9; }
+  .btn-primary { background: var(--blue); color: white; }
+  .btn-whatsapp { background: #25d366; color: white; }
+  .btn-reset { background: transparent; color: var(--muted); border: 1.5px solid var(--border); font-size: 14px; padding: 12px; }
+
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(10,20,50,.55); z-index: 100; align-items: flex-end; justify-content: center; backdrop-filter: blur(2px); }
+  .modal-overlay.open { display: flex; }
+  .modal { background: white; border-radius: 22px 22px 0 0; padding: 28px 22px 36px; width: 100%; max-width: 500px; max-height: 85vh; overflow-y: auto; animation: slideUp .25s ease; }
+  @keyframes slideUp { from { transform: translateY(60px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .modal-header h2 { font-size: 17px; font-weight: 700; color: var(--blue); }
+  .modal-close { background: var(--gray-bg); border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted); }
+
+  .resumen-bloque { background: var(--gray-bg); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; font-size: 14px; line-height: 1.7; }
+  .resumen-bloque strong { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .7px; color: var(--muted); margin-bottom: 4px; }
+  .estado-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 700; }
+  .estado-Resuelto { background: var(--green-light); color: var(--green); }
+  .estado-presupuesto { background: #fff8e1; color: #b45309; }
+  .estado-reagendar { background: #eff6ff; color: #1d4ed8; }
+
+  .footer { text-align: center; font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: #1a1a2e; color: white; padding: 12px 22px; border-radius: 30px; font-size: 14px; font-weight: 500; z-index: 200; transition: transform .3s ease; white-space: nowrap; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <img src="data:image/jpeg;base64,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" alt="Climax" style="height:48px;margin-bottom:6px;display:block;margin-left:auto;margin-right:auto;">
+  <h1>Informe de Servicio</h1>
+  <div class="fecha-hora" id="fechaHora">—</div>
+</header>
+
+<div class="container">
+
+  <!-- 1. Datos del servicio -->
+  <div class="card">
+    <div class="card-title"><span class="num">1</span> Datos del servicio</div>
+
+    <label class="field-label">📅 Fecha del servicio</label>
+    <input type="date" id="fechaServicio">
+
+    <input id="cliente" placeholder="Nombre del cliente" autocomplete="off">
+    <input id="telefono" type="tel" placeholder="Teléfono del cliente" autocomplete="off">
+
+    <div class="two-col">
+      <div><label>Dirección</label><input id="direccion" placeholder="Ej: Av. Rivadavia 1234"></div>
+      <div><label>Localidad</label><input id="localidad" placeholder="Ej: Caballito"></div>
+    </div>
+
+    <div class="select-wrapper">
+      <select id="equipo" onchange="mostrarSubtipo()">
+        <option value="">Tipo de equipo</option>
+        <option value="Aire acondicionado">Aire acondicionado</option>
+        <option value="Calefactor">Calefactor</option>
+        <option value="Caldera">Caldera</option>
+        <option value="VRF / Multi V">VRF / Multi V</option>
+        <option value="Piso radiante">Piso radiante</option>
+      </select>
+    </div>
+
+    <div class="subtipo-wrapper select-wrapper" id="subtipo-aa">
+      <select id="subtipo-aa-sel">
+        <option value="">— Subtipo A. Acond. —</option>
+        <option>Rack</option><option>Split Mural</option><option>Piso Techo</option>
+        <option>Bajo Silueta</option><option>Cassette</option><option>Central</option><option>Rooftop</option>
+      </select>
+    </div>
+    <div class="subtipo-wrapper select-wrapper" id="subtipo-calefactor">
+      <select id="subtipo-calefactor-sel">
+        <option value="">— Subtipo Calefactor —</option>
+        <option>A Gas</option><option>Eléctrico</option>
+      </select>
+    </div>
+    <div class="subtipo-wrapper select-wrapper" id="subtipo-caldera">
+      <select id="subtipo-caldera-sel" onchange="mostrarSubtipoCaldera()">
+        <option value="">— Subtipo Caldera —</option>
+        <option value="Simple">Simple</option>
+        <option value="Condensación">Condensación</option>
+      </select>
+    </div>
+    <div class="subtipo-wrapper select-wrapper" id="subtipo-caldera-simple">
+      <select id="subtipo-caldera-simple-sel">
+        <option value="">— Tipo Simple —</option>
+        <option>Tiro Natural</option>
+        <option>Tiro Forzado</option>
+      </select>
+    </div>
+
+    <div class="three-col">
+      <div><label>Marca</label><input id="marca" placeholder="Ej: Carrier"></div>
+      <div><label>Modelo</label><input id="modelo" placeholder="Ej: AR12"></div>
+      <div><label>Capacidad</label><input id="capacidad" placeholder="Ej: 3000W"></div>
+    </div>
+
+    <input id="tecnico" placeholder="Nombre del técnico" autocomplete="off">
+
+    <div class="two-col">
+      <div><label>🕐 Hora inicio</label><input type="time" id="horaInicio"></div>
+      <div><label>🕓 Hora fin</label><input type="time" id="horaFin"></div>
+    </div>
+  </div>
+
+  <!-- 2. Problema -->
+  <div class="card">
+    <div class="card-title"><span class="num">2</span> Problema reportado</div>
+    <div class="problems-grid">
+      <button class="problem-btn" data-valor="No enfría"><span class="emoji">❄️</span>No enfría</button>
+      <button class="problem-btn" data-valor="Pierde agua"><span class="emoji">💧</span>Pierde agua</button>
+      <button class="problem-btn" data-valor="Eléctrico"><span class="emoji">⚡</span>Eléctrico</button>
+      <button class="problem-btn" data-valor="Calefacción"><span class="emoji">🔥</span>Calefacción</button>
+      <button class="problem-btn" data-valor="Mantenimiento"><span class="emoji">🛠</span>Mantenimiento</button>
+      <button class="problem-btn" data-valor="Hace ruido"><span class="emoji">🔊</span>Hace ruido</button>
+    </div>
+  </div>
+
+  <!-- 3. Trabajo -->
+  <div class="card">
+    <div class="card-title"><span class="num">3</span> Trabajo realizado</div>
+    <textarea id="trabajo" placeholder="Describí brevemente el trabajo realizado…"></textarea>
+    <input id="repuesto" placeholder="🔩 Repuesto necesario (opcional)" autocomplete="off">
+    <textarea id="observacion" placeholder="Observaciones adicionales (opcional)…" rows="3"></textarea>
+  </div>
+
+  <!-- 4. Cierre -->
+  <div class="card">
+    <div class="card-title"><span class="num">4</span> Cierre del servicio</div>
+    <div class="select-wrapper">
+      <select id="estado" onchange="mostrarPresupuesto()">
+        <option value="">Estado final</option>
+        <option>Resuelto</option>
+        <option>Requiere presupuesto</option>
+        <option>Reagendar visita</option>
+      </select>
+    </div>
+
+    <div class="presupuesto-detalle" id="presupuestoDetalle">
+      <span class="presupuesto-label">💰 ¿Qué hay que presupuestar?</span>
+      <textarea id="presupuestoTexto" placeholder="Detallá los trabajos o repuestos a presupuestar…" rows="3"></textarea>
+    </div>
+
+    <label class="file-label">
+      <span>📎 Adjuntar foto (opcional)</span>
+      <input type="file" accept="image/*" id="fotoInput" onchange="mostrarFoto(this)">
+      <span id="foto-nombre"></span>
+    </label>
+    <div class="foto-aviso" id="fotoAviso">
+      📌 Recordá enviar la foto por separado en WhatsApp, no se adjunta automáticamente.
+    </div>
+
+    <div class="btns">
+      <button class="btn btn-primary" onclick="verResumen()">📋 Ver resumen</button>
+      <button class="btn btn-whatsapp" onclick="enviarWhatsApp()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Enviar por WhatsApp
+      </button>
+      <button class="btn btn-reset" onclick="resetForm()">🔄 Nuevo informe</button>
+    </div>
+  </div>
+
+  <div class="footer">Uso interno técnico · Climax Service</div>
+</div>
+
+<!-- Modal Resumen -->
+<div class="modal-overlay" id="modalOverlay" onclick="cerrarModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>📄 Resumen del informe</h2>
+      <button class="modal-close" onclick="cerrarModalBtn()">✕</button>
+    </div>
+    <div id="resumenContenido"></div>
+    <div class="btns" style="margin-top:18px">
+      <button class="btn btn-whatsapp" onclick="enviarWhatsApp()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Enviar por WhatsApp
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // Header fecha/hora
+  function actualizarFecha() {
+    const ahora = new Date();
+    document.getElementById('fechaHora').textContent =
+      ahora.toLocaleDateString('es-AR', { weekday:'long', year:'numeric', month:'long', day:'numeric' }) +
+      ' · ' + ahora.toLocaleTimeString('es-AR', { hour:'2-digit', minute:'2-digit' });
+  }
+  actualizarFecha();
+  setInterval(actualizarFecha, 60000);
+
+  // Fecha de hoy por defecto
+  const hoy = new Date();
+  document.getElementById('fechaServicio').value =
+    `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}-${String(hoy.getDate()).padStart(2,'0')}`;
+
+  function getFechaFormateada() {
+    const val = document.getElementById('fechaServicio').value;
+    if (!val) return new Date().toLocaleDateString('es-AR');
+    const [y,m,d] = val.split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  // Subtipos
+  function mostrarSubtipo() {
+    const val = document.getElementById('equipo').value;
+    document.getElementById('subtipo-aa').classList.toggle('visible', val === 'Aire acondicionado');
+    document.getElementById('subtipo-calefactor').classList.toggle('visible', val === 'Calefactor');
+    document.getElementById('subtipo-caldera').classList.toggle('visible', val === 'Caldera');
+  }
+
+  function getEquipoCompleto() {
+    const tipo = document.getElementById('equipo').value;
+    if (tipo === 'Caldera') {
+      const sub = document.getElementById('subtipo-caldera-sel').value;
+      const simple = document.getElementById('subtipo-caldera-simple-sel').value;
+      if (sub === 'Simple' && simple) return `Caldera – Simple – ${simple}`;
+      return sub ? `Caldera – ${sub}` : 'Caldera';
+    }
+    const map = { 'Aire acondicionado':'subtipo-aa-sel', 'Calefactor':'subtipo-calefactor-sel' };
+    if (map[tipo]) {
+      const sub = document.getElementById(map[tipo]).value;
+      return sub ? `${tipo} – ${sub}` : tipo;
+    }
+    return tipo;
+  }
+
+  function mostrarSubtipoCaldera() {
+    const val = document.getElementById('subtipo-caldera-sel').value;
+    document.getElementById('subtipo-caldera-simple').classList.toggle('visible', val === 'Simple');
+  }
+
+  // Presupuesto detalle
+  function mostrarPresupuesto() {
+    const estado = document.getElementById('estado').value;
+    document.getElementById('presupuestoDetalle').classList.toggle('visible', estado === 'Requiere presupuesto');
+  }
+
+  // Problemas
+  document.querySelectorAll('.problem-btn').forEach(btn => {
+    btn.addEventListener('click', () => btn.classList.toggle('selected'));
+  });
+  function getProblemas() {
+    return [...document.querySelectorAll('.problem-btn.selected')].map(b => b.dataset.valor);
+  }
+
+  // Foto
+  function mostrarFoto(input) {
+    const nombre = input.files[0]?.name || '';
+    document.getElementById('foto-nombre').textContent = nombre ? `✓ ${nombre}` : '';
+    document.getElementById('fotoAviso').classList.toggle('visible', !!nombre);
+  }
+
+  function verResumen() {
+    const cliente = document.getElementById('cliente').value.trim();
+    const equipo = getEquipoCompleto();
+    const estado = document.getElementById('estado').value;
+    if (!cliente || !equipo || !estado) { mostrarToast('⚠️ Completá cliente, equipo y estado final'); return; }
+
+    const telefono = document.getElementById('telefono').value.trim();
+    const direccion = document.getElementById('direccion').value.trim();
+    const localidad = document.getElementById('localidad').value.trim();
+    const marca = document.getElementById('marca').value.trim();
+    const modelo = document.getElementById('modelo').value.trim();
+    const capacidad = document.getElementById('capacidad').value.trim();
+    const tecnico = document.getElementById('tecnico').value.trim();
+    const trabajo = document.getElementById('trabajo').value.trim();
+    const repuesto = document.getElementById('repuesto').value.trim();
+    const observacion = document.getElementById('observacion').value.trim();
+    const presupuestoTexto = document.getElementById('presupuestoTexto').value.trim();
+    const problemas = getProblemas();
+    const horaInicio = document.getElementById('horaInicio').value;
+    const horaFin = document.getElementById('horaFin').value;
+
+    const estadoClass = estado.includes('Resuelto') ? 'Resuelto' : estado.includes('presupuesto') ? 'presupuesto' : 'reagendar';
+    const equipoExtra = [marca, modelo, capacidad].filter(Boolean).join(' · ');
+    const ubicacion = [direccion, localidad].filter(Boolean).join(', ');
+
+    let html = `
+      <div class="resumen-bloque"><strong>📅 Fecha</strong>${getFechaFormateada()}</div>
+      ${(horaInicio||horaFin) ? `<div class="resumen-bloque"><strong>🕐 Horario</strong>Inicio: ${horaInicio||'—'} · Fin: ${horaFin||'—'}</div>` : ''}
+      <div class="resumen-bloque">
+        <strong>👤 Cliente</strong>
+        ${cliente}
+        ${telefono ? `<br>📞 ${telefono}` : ''}
+        ${ubicacion ? `<br>📍 ${ubicacion}` : ''}
+      </div>
+      <div class="resumen-bloque">
+        <strong>🔧 Equipo</strong>${equipo}
+        ${equipoExtra ? `<br><span style="color:var(--muted);font-size:13px">${equipoExtra}</span>` : ''}
+      </div>
+      ${problemas.length ? `<div class="resumen-bloque"><strong>⚠️ Problema(s)</strong>${problemas.join(' · ')}</div>` : ''}
+      ${trabajo ? `<div class="resumen-bloque"><strong>📝 Trabajo realizado</strong>${trabajo}</div>` : ''}
+      ${repuesto ? `<div class="resumen-bloque"><strong>🔩 Repuesto necesario</strong>${repuesto}</div>` : ''}
+      ${observacion ? `<div class="resumen-bloque"><strong>💬 Observaciones</strong>${observacion}</div>` : ''}
+      <div class="resumen-bloque">
+        <strong>✅ Estado final</strong>
+        <span class="estado-badge estado-${estadoClass}">${estado}</span>
+      </div>
+      ${presupuestoTexto ? `<div class="resumen-bloque" style="border:1.5px solid #fde68a"><strong>💰 A presupuestar</strong>${presupuestoTexto}</div>` : ''}
+      ${tecnico ? `<div class="resumen-bloque"><strong>👷 Técnico</strong>${tecnico}</div>` : ''}
+    `;
+
+    document.getElementById('resumenContenido').innerHTML = html;
+    document.getElementById('modalOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function cerrarModal(e) { if (e.target === document.getElementById('modalOverlay')) cerrarModalBtn(); }
+  function cerrarModalBtn() { document.getElementById('modalOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+
+  function enviarWhatsApp() {
+    const cliente = document.getElementById('cliente').value.trim();
+    const telefono = document.getElementById('telefono').value.trim();
+    const direccion = document.getElementById('direccion').value.trim();
+    const localidad = document.getElementById('localidad').value.trim();
+    const equipo = getEquipoCompleto();
+    const marca = document.getElementById('marca').value.trim();
+    const modelo = document.getElementById('modelo').value.trim();
+    const capacidad = document.getElementById('capacidad').value.trim();
+    const tecnico = document.getElementById('tecnico').value.trim();
+    const trabajo = document.getElementById('trabajo').value.trim();
+    const repuesto = document.getElementById('repuesto').value.trim();
+    const observacion = document.getElementById('observacion').value.trim();
+    const estado = document.getElementById('estado').value;
+    const presupuestoTexto = document.getElementById('presupuestoTexto').value.trim();
+    const problemas = getProblemas();
+    const horaInicio = document.getElementById('horaInicio').value;
+    const horaFin = document.getElementById('horaFin').value;
+    const ubicacion = [direccion, localidad].filter(Boolean).join(', ');
+    const equipoExtra = [marca, modelo, capacidad].filter(Boolean).join(' · ');
+
+    let msg = `*⚙️ INFORME DE SERVICIO*\n`;
+    msg += `📅 ${getFechaFormateada()}\n`;
+    if (horaInicio || horaFin) msg += `🕐 Inicio: ${horaInicio||'—'}  |  Fin: ${horaFin||'—'}\n`;
+    msg += `\n👤 *Cliente:* ${cliente}\n`;
+    if (telefono) msg += `📞 *Tel:* ${telefono}\n`;
+    if (ubicacion) msg += `📍 *Dirección:* ${ubicacion}\n`;
+    msg += `\n🔧 *Equipo:* ${equipo}\n`;
+    if (equipoExtra) msg += `   ${equipoExtra}\n`;
+    if (problemas.length) msg += `⚠️ *Problema:* ${problemas.join(', ')}\n`;
+    if (trabajo) msg += `\n📝 *Trabajo realizado:*\n${trabajo}\n`;
+    if (repuesto) msg += `\n🔩 *Repuesto necesario:* ${repuesto}\n`;
+    if (observacion) msg += `\n💬 *Observaciones:*\n${observacion}\n`;
+    msg += `\n✅ *Estado:* ${estado}`;
+    if (presupuestoTexto) msg += `\n💰 *A presupuestar:*\n${presupuestoTexto}`;
+    if (tecnico) msg += `\n\n👷 *Técnico:* ${tecnico}`;
+
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+  }
+
+  function resetForm() {
+    ['cliente','telefono','direccion','localidad','marca','modelo','capacidad',
+     'tecnico','trabajo','repuesto','observacion','presupuestoTexto'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('equipo').value = '';
+    document.getElementById('estado').value = '';
+    document.getElementById('horaInicio').value = '';
+    document.getElementById('horaFin').value = '';
+    ['subtipo-aa-sel','subtipo-calefactor-sel','subtipo-caldera-sel','subtipo-caldera-simple-sel'].forEach(id => document.getElementById(id).value = '');
+    ['subtipo-aa','subtipo-calefactor','subtipo-caldera','subtipo-caldera-simple'].forEach(id => document.getElementById(id).classList.remove('visible'));
+    document.getElementById('presupuestoDetalle').classList.remove('visible');
+    document.getElementById('foto-nombre').textContent = '';
+    document.getElementById('fotoInput').value = '';
+    document.getElementById('fotoAviso').classList.remove('visible');
+    document.querySelectorAll('.problem-btn.selected').forEach(b => b.classList.remove('selected'));
+    // Resetear fecha a hoy
+    const hoy = new Date();
+    document.getElementById('fechaServicio').value =
+      `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}-${String(hoy.getDate()).padStart(2,'0')}`;
+    cerrarModalBtn();
+    mostrarToast('✅ Formulario reiniciado');
+  }
+
+  function mostrarToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+</script>
+</body>
+</html>
