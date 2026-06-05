@@ -384,6 +384,7 @@
     document.getElementById('resumenContenido').innerHTML = html;
     document.getElementById('modalOverlay').classList.add('open');
     document.body.style.overflow = 'hidden';
+
   }
 
   function cerrarModal(e) { if (e.target === document.getElementById('modalOverlay')) cerrarModalBtn(); }
@@ -427,6 +428,29 @@
     if (tecnico) msg += `\n\n👷 *Técnico:* ${tecnico}`;
 
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+
+    // Guardar en Google Sheets
+    var fila = [
+      getFechaFormateada(),
+      (horaInicio || '') + (horaFin ? ' - ' + horaFin : ''),
+      tecnico,
+      cliente,
+      ubicacion,
+      telefono,
+      equipo,
+      marca,
+      modelo,
+      trabajo,
+      repuesto,
+      observacion + (presupuestoTexto ? ' | A presupuestar: ' + presupuestoTexto : ''),
+      ''
+    ];
+    fetch('https://script.google.com/macros/s/AKfycbyIF1-gdPJU41pJLZaAG1IhgYTlEvrUltcu2OqBappTz4Hni9GBMPg2ODHfQu23SikF/exec', {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ hoja: 'informes', fila: fila })
+    }).catch(function() {});
   }
 
   function resetForm() {
