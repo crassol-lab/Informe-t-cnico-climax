@@ -20,12 +20,9 @@
   header .fecha-hora { font-family: 'DM Mono', monospace; font-size: 12px; opacity: .75; margin-top: 4px; }
 
   .container { max-width: 500px; margin: 0 auto; padding: 18px 16px; display: flex; flex-direction: column; gap: 14px; }
-
   .card { background: var(--card-bg); border-radius: 16px; padding: 20px; box-shadow: var(--shadow); border: 1px solid var(--border); }
-
   .card-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--blue); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
   .card-title .num { background: var(--blue); color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; }
-
   .field-label { font-size: 12px; font-weight: 600; color: var(--muted); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .5px; }
 
   input, textarea, select {
@@ -111,21 +108,16 @@
 
 <div class="container">
 
-  <!-- 1. Datos del servicio -->
   <div class="card">
     <div class="card-title"><span class="num">1</span> Datos del servicio</div>
-
     <label class="field-label">📅 Fecha del servicio</label>
     <input type="date" id="fechaServicio">
-
     <input id="cliente" placeholder="Nombre del cliente" autocomplete="off">
     <input id="telefono" type="tel" placeholder="Teléfono del cliente" autocomplete="off">
-
     <div class="two-col">
       <div><label>Dirección</label><input id="direccion" placeholder="Ej: Av. Rivadavia 1234"></div>
       <div><label>Localidad</label><input id="localidad" placeholder="Ej: Caballito"></div>
     </div>
-
     <div class="select-wrapper">
       <select id="equipo" onchange="mostrarSubtipo()">
         <option value="">Tipo de equipo</option>
@@ -136,7 +128,6 @@
         <option value="Piso radiante">Piso radiante</option>
       </select>
     </div>
-
     <div class="subtipo-wrapper select-wrapper" id="subtipo-aa">
       <select id="subtipo-aa-sel">
         <option value="">— Subtipo A. Acond. —</option>
@@ -164,22 +155,18 @@
         <option>Tiro Forzado</option>
       </select>
     </div>
-
     <div class="three-col">
       <div><label>Marca</label><input id="marca" placeholder="Ej: Carrier"></div>
       <div><label>Modelo</label><input id="modelo" placeholder="Ej: AR12"></div>
       <div><label>Capacidad</label><input id="capacidad" placeholder="Ej: 3000W"></div>
     </div>
-
     <input id="tecnico" placeholder="Nombre del técnico" autocomplete="off">
-
     <div class="two-col">
       <div><label>🕐 Hora inicio</label><input type="time" id="horaInicio"></div>
       <div><label>🕓 Hora fin</label><input type="time" id="horaFin"></div>
     </div>
   </div>
 
-  <!-- 2. Problema -->
   <div class="card">
     <div class="card-title"><span class="num">2</span> Problema reportado</div>
     <div class="problems-grid">
@@ -192,7 +179,6 @@
     </div>
   </div>
 
-  <!-- 3. Trabajo -->
   <div class="card">
     <div class="card-title"><span class="num">3</span> Trabajo realizado</div>
     <textarea id="trabajo" placeholder="Describí brevemente el trabajo realizado…"></textarea>
@@ -200,7 +186,6 @@
     <textarea id="observacion" placeholder="Observaciones adicionales (opcional)…" rows="3"></textarea>
   </div>
 
-  <!-- 4. Cierre -->
   <div class="card">
     <div class="card-title"><span class="num">4</span> Cierre del servicio</div>
     <div class="select-wrapper">
@@ -211,12 +196,10 @@
         <option>Reagendar visita</option>
       </select>
     </div>
-
     <div class="presupuesto-detalle" id="presupuestoDetalle">
       <span class="presupuesto-label">💰 ¿Qué hay que presupuestar?</span>
       <textarea id="presupuestoTexto" placeholder="Detallá los trabajos o repuestos a presupuestar…" rows="3"></textarea>
     </div>
-
     <label class="file-label">
       <span>📎 Adjuntar foto (opcional)</span>
       <input type="file" accept="image/*" id="fotoInput" onchange="mostrarFoto(this)">
@@ -225,7 +208,6 @@
     <div class="foto-aviso" id="fotoAviso">
       📌 Recordá enviar la foto por separado en WhatsApp, no se adjunta automáticamente.
     </div>
-
     <div class="btns">
       <button class="btn btn-primary" onclick="verResumen()">📋 Ver resumen</button>
       <button class="btn btn-whatsapp" onclick="enviarWhatsApp()">
@@ -239,7 +221,6 @@
   <div class="footer">Uso interno técnico · Climax Service</div>
 </div>
 
-<!-- Modal Resumen -->
 <div class="modal-overlay" id="modalOverlay" onclick="cerrarModal(event)">
   <div class="modal">
     <div class="modal-header">
@@ -259,7 +240,6 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // Header fecha/hora
   function actualizarFecha() {
     const ahora = new Date();
     document.getElementById('fechaHora').textContent =
@@ -269,7 +249,6 @@
   actualizarFecha();
   setInterval(actualizarFecha, 60000);
 
-  // Fecha de hoy por defecto
   const hoy = new Date();
   document.getElementById('fechaServicio').value =
     `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}-${String(hoy.getDate()).padStart(2,'0')}`;
@@ -281,7 +260,6 @@
     return `${d}/${m}/${y}`;
   }
 
-  // Subtipos
   function mostrarSubtipo() {
     const val = document.getElementById('equipo').value;
     document.getElementById('subtipo-aa').classList.toggle('visible', val === 'Aire acondicionado');
@@ -310,13 +288,11 @@
     document.getElementById('subtipo-caldera-simple').classList.toggle('visible', val === 'Simple');
   }
 
-  // Presupuesto detalle
   function mostrarPresupuesto() {
     const estado = document.getElementById('estado').value;
     document.getElementById('presupuestoDetalle').classList.toggle('visible', estado === 'Requiere presupuesto');
   }
 
-  // Problemas
   document.querySelectorAll('.problem-btn').forEach(btn => {
     btn.addEventListener('click', () => btn.classList.toggle('selected'));
   });
@@ -324,7 +300,6 @@
     return [...document.querySelectorAll('.problem-btn.selected')].map(b => b.dataset.valor);
   }
 
-  // Foto
   function mostrarFoto(input) {
     const nombre = input.files[0]?.name || '';
     document.getElementById('foto-nombre').textContent = nombre ? `✓ ${nombre}` : '';
@@ -384,7 +359,6 @@
     document.getElementById('resumenContenido').innerHTML = html;
     document.getElementById('modalOverlay').classList.add('open');
     document.body.style.overflow = 'hidden';
-
   }
 
   function cerrarModal(e) { if (e.target === document.getElementById('modalOverlay')) cerrarModalBtn(); }
@@ -429,21 +403,19 @@
 
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
 
-    // Guardar en Google Sheets
     var fila = [
       getFechaFormateada(),
       (horaInicio || '') + (horaFin ? ' - ' + horaFin : ''),
       tecnico,
       cliente,
       ubicacion,
-      telefono,
       equipo,
       marca,
       modelo,
       trabajo,
+      estado,
       repuesto,
-      observacion + (presupuestoTexto ? ' | A presupuestar: ' + presupuestoTexto : ''),
-      ''
+      observacion + (presupuestoTexto ? ' | A presupuestar: ' + presupuestoTexto : '')
     ];
     fetch('https://script.google.com/macros/s/AKfycbyIF1-gdPJU41pJLZaAG1IhgYTlEvrUltcu2OqBappTz4Hni9GBMPg2ODHfQu23SikF/exec', {
       method: 'POST',
@@ -467,7 +439,6 @@
     document.getElementById('fotoInput').value = '';
     document.getElementById('fotoAviso').classList.remove('visible');
     document.querySelectorAll('.problem-btn.selected').forEach(b => b.classList.remove('selected'));
-    // Resetear fecha a hoy
     const hoy = new Date();
     document.getElementById('fechaServicio').value =
       `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}-${String(hoy.getDate()).padStart(2,'0')}`;
